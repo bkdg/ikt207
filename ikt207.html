@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İstatistik Çalışma Platformu</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- MathJax for formulas -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="mathjax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+        }
+        .container-box {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .btn-primary {
+            background-color: #2563eb;
+            color: white;
+            transition: background-color 0.2s;
+        }
+        .btn-primary:hover { background-color: #1d4ed8; }
+        .btn-outline {
+            background-color: white;
+            border: 1px solid #cbd5e1;
+            color: #475569;
+            transition: all 0.2s;
+        }
+        .btn-outline:hover:not(:disabled) {
+            border-color: #94a3b8;
+            background-color: #f1f5f9;
+        }
+        .badge-vize {
+            background-color: #fef08a;
+            color: #854d0e;
+            border: 1px solid #fde047;
+        }
+        /* Gizleme sınıfı */
+        .hidden-view { display: none !important; }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex justify-center min-h-screen">
+
+    <div class="w-full max-w-4xl">
+        <!-- Header -->
+        <div class="mb-8 border-b border-slate-200 pb-4">
+            <h1 class="text-3xl font-bold text-slate-800">İstatistik: Bölüm 1 & 2</h1>
+            <p class="text-slate-500 mt-2 text-sm md:text-base">Kavramları mantığıyla öğrenin, soru çözerek pekiştirin ve vizeye hazırlanın.</p>
+        </div>
+
+        <!-- ANA MENÜ -->
+        <div id="menu-screen" class="container-box p-6 md:p-8">
+            <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
+                <h2 class="text-xl font-semibold text-slate-800">Çalışma Menüsü</h2>
+                <div class="text-xs font-medium badge-vize px-2 py-1 rounded">Vize Öncelikli</div>
+            </div>
+            
+            <p class="text-slate-600 mb-6 text-sm">Aşağıdan çalışmak istediğiniz konuyu seçebilir veya en alttaki buton ile tüm konuları sırayla test edebilirsiniz.</p>
+            
+            <div id="topic-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-8">
+                <!-- Javascript ile doldurulacak -->
+            </div>
+
+            <div class="text-center pt-4 border-t border-slate-100">
+                <button onclick="startAllTopics()" class="btn-primary w-full md:w-auto px-8 py-3 rounded font-medium text-sm">
+                    Tüm Konuları Sırayla Oyna
+                </button>
+            </div>
+        </div>
+
+        <!-- KAVRAM KARTI (Öğretici Ekran) -->
+        <div id="concept-screen" class="container-box p-6 md:p-8 hidden-view">
+            <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-200">
+                <button onclick="returnToMenu()" class="text-sm text-blue-600 hover:underline">← Menüye Dön</button>
+                <span id="concept-progress" class="text-sm text-slate-500 font-medium"></span>
+            </div>
+            
+            <div class="mb-6 flex items-start gap-3">
+                <h3 id="concept-title" class="text-2xl font-bold text-slate-800">Konu Başlığı</h3>
+                <span id="concept-star" class="text-xs font-medium badge-vize px-2 py-1 rounded hidden-view mt-1">Vize</span>
+            </div>
+            
+            <div id="concept-content" class="bg-slate-50 p-5 rounded border border-slate-200 text-slate-700 leading-relaxed text-[15px] mb-8">
+                <!-- İçerik -->
+            </div>
+            
+            <div class="flex justify-end">
+                <button onclick="goToQuestion()" class="btn-primary px-6 py-2.5 rounded font-medium text-sm">
+                    Mantığı Anladım, Soruya Geç →
+                </button>
+            </div>
+        </div>
+
+        <!-- SORU EKRANI -->
+        <div id="quiz-screen" class="container-box p-6 md:p-8 hidden-view">
+            <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-200">
+                <button onclick="returnToMenu()" class="text-sm text-blue-600 hover:underline">← Menü</button>
+                <span class="text-sm font-medium bg-blue-50 text-blue-700 px-3 py-1 rounded border border-blue-100">
+                    Skor: <span id="score">0</span>
+                </span>
+            </div>
+            
+            <h3 id="question-text" class="text-lg font-medium mb-6 text-slate-800 leading-relaxed">Soru Metni</h3>
+            
+            <div id="options-container" class="space-y-3 mb-6">
+                <!-- Butonlar -->
+            </div>
+
+            <!-- Geri Bildirim Alanı (Doğru/Yanlış) -->
+            <div id="feedback-box" class="hidden-view p-4 rounded text-sm mb-6 border">
+                <!-- İçerik JS ile eklenecek -->
+            </div>
+
+            <div class="flex justify-end">
+                <button id="next-btn" onclick="handleNext()" class="btn-primary hidden-view px-6 py-2.5 rounded font-medium text-sm">
+                    Devam Et →
+                </button>
+            </div>
+        </div>
+
+        <!-- SONUÇ EKRANI -->
+        <div id="result-screen" class="container-box p-8 text-center hidden-view">
+            <h2 class="text-2xl font-bold text-slate-800 mb-2">Çalışma Tamamlandı</h2>
+            <p class="text-slate-600 mb-6">Oturumdaki toplam puanınız: <strong class="text-blue-600 text-xl" id="final-score">0</strong></p>
+
+            <div id="weakness-container" class="bg-red-50 border border-red-100 p-6 rounded mb-6 text-left max-w-2xl mx-auto hidden-view">
+                <h3 class="text-red-800 font-semibold mb-3">Eksik Kaldığınız Konular:</h3>
+                <p class="text-sm text-red-600 mb-4">Bu konulardaki soruları yanlış cevapladınız. Sistem bu konuları size tekrar anlatıp yeni sorular sormak için bir eksik giderme seti hazırladı.</p>
+                <ul id="weakness-list" class="list-disc list-inside text-sm text-red-700 space-y-1 mb-6"></ul>
+                
+                <button onclick="startRemedial()" class="w-full bg-red-600 hover:bg-red-700 text-white py-2.5 rounded font-medium text-sm transition">
+                    Eksik Giderme Setini Başlat
+                </button>
+            </div>
+
+            <div id="perfect-score-container" class="bg-green-50 border border-green-200 p-6 rounded mb-6 hidden-view">
+                <h3 class="text-green-800 font-semibold mb-2">Harika İş Çıkardınız!</h3>
+                <p class="text-green-700 text-sm">Test edilen hiçbir konuda eksiğiniz bulunmuyor. Vize için oldukça hazırsınız.</p>
+            </div>
+
+            <button onclick="returnToMenu()" class="btn-outline px-6 py-2.5 rounded font-medium text-sm mt-4">
+                Ana Menüye Dön
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // TÜM KONULAR (Açıklamalar uzatıldı ve basitleştirildi)
+        const allTopics = [
+            // --- BÖLÜM 1 ---
+            {
+                id: "populasyon_orneklem",
+                section: "Bölüm 1",
+                title: "Anakütle, Örneklem ve Parametre",
+                isImportantForMidterm: true,
+                concept: "Düşünün ki Türkiye'deki tüm üniversite öğrencilerinin aylık harcamasını merak ediyorsunuz. İlgilendiğiniz bu büyük grubun tamamına <strong>Anakütle (N)</strong> denir. Eğer gerçekten milyonlarca öğrenciye tek tek ulaşıp bir ortalama hesaplarsanız, elde ettiğiniz bu kesin değere <strong>Parametre</strong> denir.<br><br>Ancak gerçek hayatta herkese ulaşmak hem çok pahalı hem de zaman alıcıdır. Bu yüzden rastgele 1000 kişi seçersiniz. Seçtiğiniz bu küçük gruba <strong>Örneklem (n)</strong> denir. Bu 1000 kişiden hesapladığınız ortalama harcama değerine ise <strong>İstatistik</strong> denir. Yani Parametre bütünü, İstatistik ise parçayı temsil eder.",
+                question: "Bir pazar araştırmacısı, ürettikleri yeni çikolatanın beğenilip beğenilmediğini anlamak için markete gelen 500 müşteriye çikolatayı tattırmış ve 'Müşterilerimizin %72'si ürünü beğendi' şeklinde bir rapor sunmuştur. Buradaki '%72' oranı istatistiksel olarak neyi ifade eder?",
+                options: [
+                    { text: "Parametre", isCorrect: false, rationale: "Parametre olabilmesi için dünyada bu çikolatayı yiyen/yiyecek olan herkesin ölçülmüş olması gerekirdi." },
+                    { text: "İstatistik", isCorrect: true, rationale: "Sadece 500 kişilik bir alt grup (örneklem) kullanılarak hesaplandığı için bu bir İstatistik'tir." },
+                    { text: "Anakütle Hacmi", isCorrect: false, rationale: "Anakütle hacmi (N) ilgilenilen toplam kişi sayısıdır, bir oran veya sonuç değildir." }
+                ]
+            },
+            {
+                id: "ornekleme_turleri",
+                section: "Bölüm 1",
+                title: "Rassal ve Sistematik Örnekleme",
+                isImportantForMidterm: false,
+                concept: "Örneklem seçerken taraf tutmamanız gerekir. <strong>Basit Rassal Örnekleme</strong>, bir torbadan isim çekmek gibidir; herkesin şansı eşittir.<br><br><strong>Sistematik Örnekleme</strong> ise biraz daha düzenlidir. Diyelim ki 1000 kişilik bir listeniz var (N) ve 50 kişi (n) seçeceksiniz. Önce atlama miktarını bulursunuz: 1000 / 50 = 20. İlk kişiyi 1 ile 20 arasından rastgele seçersiniz (örneğin 7. kişi). Bundan sonraki herkesi 20 ekleyerek seçersiniz (7, 27, 47, 67...). Bu yönteme sistematik örnekleme denir.",
+                question: "Bir fabrikada gün içinde üretilen 400 adet televizyondan 20 tanesi kalite kontrole gönderilecektir. Başlangıç sayısı olarak rastgele 5. televizyon seçilmiştir. Sistematik örnekleme yöntemine göre kontrol edilecek bir sonraki (ikinci) televizyon sıradan kaçıncı televizyon olmalıdır?",
+                options: [
+                    { text: "25. televizyon", isCorrect: true, rationale: "Atlama miktarı (j) = 400 / 20 = 20'dir. İlk televizyon 5. ise, bir sonraki 5 + 20 = 25. televizyon olur." },
+                    { text: "20. televizyon", isCorrect: false, rationale: "Sadece oranı buldunuz, bu oranı başlangıç değerine (5) eklemelisiniz." },
+                    { text: "15. televizyon", isCorrect: false, rationale: "Atlama miktarı 10 değil 20'dir." }
+                ]
+            },
+            {
+                id: "olcum_seviyeleri",
+                section: "Bölüm 1",
+                title: "Veri Türleri ve Ölçüm Seviyeleri",
+                isImportantForMidterm: true,
+                concept: "Veriler yapılarına göre dörde ayrılır:<br><br><strong>1. İsim / Etiket (Nominal):</strong> Sadece gruplama yapar. Aralarında üstünlük veya sıra yoktur. Örneğin; Göz rengi, cinsiyet, araba plakası.<br><strong>2. Sıralı (Ordinal):</strong> Veriler kategoriktir ama aralarında bir küçüklük-büyüklük ilişkisi vardır. Örneğin; Rütbeler (Teğmen, Yüzbaşı) veya anket cevapları (Kötü, Orta, İyi).<br><strong>3. Aralık (Interval):</strong> Sayısal veridir ama 'gerçek bir sıfır' noktası yoktur. Örneğin; Sıcaklık (0 derece sıcaklık olmadığı anlamına gelmez).<br><strong>4. Oran (Ratio):</strong> En gelişmiş veridir. Gerçek bir mutlak sıfırı vardır ve 'iki katı' gibi hesaplar yapılabilir. Örneğin; Maaş, kilo, boy, yaş.",
+                question: "Bir anket çalışmasında katılımcılara 'Günde kaç bardak su içiyorsunuz?' sorusu sorulmuş ve 0, 2, 5 gibi sayısal cevaplar alınmıştır. Bu veri hangi ölçüm seviyesindedir?",
+                options: [
+                    { text: "Oran (Ratio)", isCorrect: true, rationale: "Su tüketimi sayısal bir veridir. '0 bardak' hiç su içilmediğini (mutlak sıfır) belirtir. Ayrıca 4 bardak, 2 bardağın tam iki katıdır." },
+                    { text: "İsim (Nominal)", isCorrect: false, rationale: "Bu sayısal bir büyüklük ifade eder, sadece bir isim veya etiket değildir." },
+                    { text: "Sıralı (Ordinal)", isCorrect: false, rationale: "Miktarlar arasındaki farklar hesaplanabildiği ve mutlak sıfır olduğu için oran seviyesidir." }
+                ]
+            },
+            {
+                id: "cikarimsal_ist",
+                section: "Bölüm 1",
+                title: "Tanımlayıcı ve Çıkarımsal İstatistik",
+                isImportantForMidterm: false,
+                concept: "İstatistik temelde ikiye ayrılır:<br><br><strong>Tanımlayıcı İstatistik:</strong> Elinizde olan veriyi başkalarına en anlaşılır şekilde sunma sanatıdır. Verinin ortalamasını almak, pasta grafiği çizmek veya tablolar yapmak tanımlayıcıdır. Geleceği tahmin etmez.<br><br><strong>Çıkarımsal İstatistik:</strong> Adı üstünde 'çıkarım' yapar. Elinizdeki küçük bir örneklemden yola çıkarak, tüm anakütle hakkında hipotez testleri yapar, karar verir veya geleceğe yönelik tahminlerde bulunur.",
+                question: "Bir ilaç firması, geliştirdiği yeni baş ağrısı ilacını 100 hastada denemiş ve 'Bu ilaç hastaların %90'ında etkilidir, dolayısıyla tüm piyasaya sürülebilir' kararı almıştır. Firmanın aldığı bu karar hangi istatistik dalının konusudur?",
+                options: [
+                    { text: "Çıkarımsal İstatistik", isCorrect: true, rationale: "Sadece 100 hastadan elde edilen sonuçla tüm popülasyon (piyasa) hakkında bir genelleme ve karar üretildiği için çıkarımsaldır." },
+                    { text: "Tanımlayıcı İstatistik", isCorrect: false, rationale: "Sadece o 100 kişinin sonucunu bir tabloda özetleseydi tanımlayıcı olurdu." }
+                ]
+            },
+            {
+                id: "grafikler_kategorik",
+                section: "Bölüm 1",
+                title: "Kategorik Veri Grafikleri: Pareto ve Çapraz Tablo",
+                isImportantForMidterm: true,
+                concept: "Kategorik (sayısal olmayan) verileri gösterirken genelde Çubuk veya Pasta grafiği kullanılır. Ancak iş dünyasında çok sorulan iki özel yapı vardır:<br><br><strong>Pareto Diyagramı:</strong> Kalite kontrolde kullanılır. Hataları veya şikayetleri en çoktan en aza doğru sıralayan bir çubuk grafiktir. Amacı '80-20 kuralını' bulmaktır (Yani sorunların %80'ine sebep olan o %20'lik ana nedeni tespit etmek).<br><strong>Çapraz Tablo (Contingency):</strong> İki farklı kategorik değişkeni aynı anda kıyaslar. Örneğin satırlarda 'Cinsiyet' (Kadın/Erkek), sütunlarda 'Tuttuğu Takım' olan bir tablo.",
+                question: "Bir e-ticaret sitesi yöneticisi, müşterilerin sepeti terk etme nedenlerini analiz etmektedir. Amacı, en çok karşılaşılan nedenleri belirleyip önce onlara odaklanmaktır (Önemli azınlığı bulmak). Bu amaç için hangi grafiği kullanması en doğrudur?",
+                options: [
+                    { text: "Pareto Diyagramı", isCorrect: true, rationale: "Sorunları azalan sıklıkla dizip 80-20 kuralını (en önemli nedenleri) tespit etmek Pareto diyagramının asıl kullanım amacıdır." },
+                    { text: "Serpilim (Scatter) Grafiği", isCorrect: false, rationale: "Serpilim grafiği sayısal değişkenlerin birbirleriyle olan matematiksel ilişkisini bulmak için kullanılır." },
+                    { text: "Histogram", isCorrect: false, rationale: "Histogram kategorik veriler için (hata türleri vb.) değil, sayısal veriler içindir." }
+                ]
+            },
+            {
+                id: "grafikler_sayisal",
+                section: "Bölüm 1",
+                title: "Sayısal Veri Grafikleri: Histogram, Dal-Yaprak",
+                isImportantForMidterm: true,
+                concept: "Eğer elinizdeki veri sayısal ise (yaş, kilo, sıcaklık vb.) farklı grafikler kullanırsınız:<br><br><strong>Histogram:</strong> Çubuk grafiğe benzer ama çubukların arasında <em>boşluk yoktur</em>. Çünkü sayısal veriler (örneğin 10-20 yaş, 20-30 yaş arası) kesintisiz devam eder.<br><strong>Dal ve Yaprak Gösterimi:</strong> Verinin orijinal rakamlarını kaybetmeden dağılımı gösterir. Örneğin 42, 45, 48 sayıları için '4' dal olur; '2, 5, 8' ise onun yaprakları olur.<br><strong>Serpilim (Scatter) Diyagramı:</strong> İki farklı sayısal değişkenin (Örn: Boy ve Kilo) ilişkili olup olmadığını noktalı bir düzlemde gösterir.",
+                question: "Çubuk grafik ile Histogram görsel olarak birbirine çok benzer. İkisi arasındaki en temel görünüm ve kullanım farkı nedir?",
+                options: [
+                    { text: "Histogramda aralıklar (sınıflar) olduğu için çubuklar bitişiktir ve sayısal veriler için kullanılır.", isCorrect: true, rationale: "Çubuk grafik kategorik veriler (örn: departmanlar) içindir ve boşlukludur. Histogram ise sayısal bir sürekliliği (örn: sıcaklık) boşluksuz çubuklarla gösterir." },
+                    { text: "Histogram sadece yatay eksende, Çubuk grafik ise dikey eksende çizilir.", isCorrect: false, rationale: "Her ikisi de çoğunlukla dikey çizilir, aralarındaki fark bu değildir." },
+                    { text: "Çubuk grafik sayısal, Histogram kategorik veriler içindir.", isCorrect: false, rationale: "Tam tersidir. Histogram sayısal, Çubuk grafik kategoriktir." }
+                ]
+            },
+            {
+                id: "sunum_hatalari",
+                section: "Bölüm 1",
+                title: "Grafiksel Veri Sunum Hataları",
+                isImportantForMidterm: false,
+                concept: "Bazen istatistikler doğru hesaplansa da, grafikler insanları bilerek veya bilmeyerek kandırabilir. En yaygın grafik hataları şunlardır:<br><br>- <strong>Sıfırdan Başlamamak:</strong> Dikey (Y) eksenini 0'dan değil de örneğin 90'dan başlatmak, çok ufak değişimlerin sanki dağlar kadar büyükmüş gibi algılanmasına neden olur.<br>- <strong>Eşit Olmayan Aralıklar:</strong> Histogram çizerken 10-20, 20-30 deyip aniden 30-60 diye geniş bir aralık kullanmak dağılımı bozar.<br>- <strong>Ekseni Sıkıştırmak:</strong> Doğal eğilimleri veya dalgalanmaları gizleyecek şekilde eksen limitlerini çok dar veya çok geniş tutmak.",
+                question: "Bir borsa spekülatörü, hisse senedinin fiyatının 100 TL'den sadece 102 TL'ye çıkmasını yatırımcılara 'muazzam bir yükseliş' gibi göstermek istiyor. Grafik çizerken yapacağı en temel etik hata / çarpıtma ne olur?",
+                options: [
+                    { text: "Dikey (Y) eksenini 0'dan değil, 99'dan başlatıp 103'te bitirerek aralığı aşırı daraltmak.", isCorrect: true, rationale: "Sıfır noktasının olmaması, 2 TL'lik küçük bir artışın grafikte devasa bir uçurum gibi görünmesine neden olur." },
+                    { text: "Pasta grafiği kullanmak yerine çizgi grafiği kullanmak.", isCorrect: false, rationale: "Zaman içindeki fiyat değişimi zaten çizgi grafikle gösterilir, bu bir hata değildir." },
+                    { text: "Pareto kuralını ihlal etmek.", isCorrect: false, rationale: "Pareto kalite kontrol ve hatalarla ilgilidir, zaman serisi grafikleriyle ilgisi yoktur." }
+                ]
+            },
+            
+            // --- BÖLÜM 2 ---
+            {
+                id: "merkezi_egilim",
+                section: "Bölüm 2",
+                title: "Merkezi Eğilim: Ortalama, Medyan ve Mod",
+                isImportantForMidterm: true,
+                concept: "Elinizdeki veriyi tek bir sayı ile özetlemek istediğinizde üç aracınız vardır:<br><br><strong>1. Aritmetik Ortalama:</strong> Herkesin bildiği yöntemdir (Toplam / Adet). Ancak çok ciddi bir zayıflığı vardır: <em>Aykırı (aşırı büyük veya küçük) değerlerden</em> anında etkilenir. Dengesi kolay bozulur.<br><strong>2. Medyan (Ortanca):</strong> Sayıları küçükten büyüğe dizersiniz, tam ortadakini alırsınız. En büyük avantajı, gruptaki aykırı zenginlerden veya aşırı düşük değerlerden <strong>etkilenmemesidir</strong> (dirençlidir).<br><strong>3. Mod:</strong> Grupta en çok tekrar eden sayıdır. Sayısal olmayan (kategorik) verilerde de (örn: en çok satılan tişört rengi) kullanılabilir.",
+                question: "Beş kişilik bir öğrenci grubunun ceplerindeki harçlıklar sırasıyla 20 TL, 30 TL, 40 TL, 50 TL ve 2000 TL (çok zengin bir öğrenci) şeklindedir. Bu grubun 'tipik' veya 'merkezi' harçlık durumunu raporlamak isteyen bir araştırmacı neden Ortalama yerine Medyanı kullanmalıdır?",
+                options: [
+                    { text: "Çünkü 2000 TL'lik aykırı değer, ortalamayı mantıksız derecede yukarı çeker; Medyan ise ortadaki değeri (40 TL) alarak aşırı uçtan korunur.", isCorrect: true, rationale: "Aykırı değerlerin (outliers) olduğu durumlarda merkezi eğilimi en iyi ve gerçekçi ölçen araç Medyandır." },
+                    { text: "Çünkü örneklem büyüklüğü 30'dan küçük olduğu için Ortalama hesaplanamaz.", isCorrect: false, rationale: "Ortalama her büyüklükteki veri için hesaplanabilir, sorun hesaplanamaması değil, yanıltıcı olmasıdır." },
+                    { text: "Çünkü parayla ilgili konularda sadece Medyan kullanılması istatistiksel bir zorunluluktur.", isCorrect: false, rationale: "Böyle bir kural yoktur; eğer veriler birbirine yakınsa maaş/para için de ortalama kullanılabilir." }
+                ]
+            },
+            {
+                id: "geometrik_ort",
+                section: "Bölüm 2",
+                title: "Geometrik Ortalama",
+                isImportantForMidterm: false,
+                concept: "Eğer zaman içinde büyüyen yüzdesel oranları, faizleri veya yatırım getirilerini hesaplıyorsanız, bildiğimiz aritmetik ortalama size <strong>yanlış ve yüksek</strong> bir sonuç verir.<br><br>Örneğin; paranız 1. yıl %50 arttı, 2. yıl ise %20 arttı. (50+20)/2 = %35 aritmetik ortalamadır ama cebinizdeki paranın gerçek ortalama büyümesi bu değildir. Birbiriyle çarpılarak büyüyen (bileşik getiri) bu tür oranların gerçek ortalamasını bulmak için <strong>Geometrik Ortalama</strong> kullanılır.",
+                question: "Bir şirketin satışları ardışık 3 yıl boyunca sırasıyla %10, %25 ve %40 büyüme göstermiştir. Bu şirketin 3 yıllık 'ortalama yıllık büyüme oranını' hatasız ölçmek için hangi yöntem kullanılmalıdır?",
+                options: [
+                    { text: "Geometrik Ortalama", isCorrect: true, rationale: "Zaman içindeki büyüme oranları, faizler ve bileşik getiriler daima Geometrik Ortalama ile hesaplanır." },
+                    { text: "Aritmetik Ortalama", isCorrect: false, rationale: "Oranların aritmetik ortalamasını almak sizi her zaman matematiksel olarak yanıltır." },
+                    { text: "Ağırlıklı Ortalama", isCorrect: false, rationale: "Yılların bir ağırlığı yoktur, sorun bileşik hesaplama (çarpım) kaynaklıdır." }
+                ]
+            },
+            {
+                id: "dagilim_sekli",
+                section: "Bölüm 2",
+                title: "Dağılımın Şekli (Çarpıklık)",
+                isImportantForMidterm: true,
+                concept: "Verilerin bir grafikte nasıl dağıldığı, Ortalama ve Medyanın birbirine göre konumundan anlaşılır:<br><br>- Eğer Ortalama ve Medyan birbirine eşitse, dağılım kusursuz bir çan eğrisi gibidir (<strong>Simetrik</strong>).<br>- Eğer Ortalama, Medyandan <strong>BÜYÜKSE</strong>: Dağılımın kuyruğu sağa doğru uzar. Çünkü sağdaki (yüksek) aykırı değerler ortalamayı kendine çekmiştir. Buna <strong>Sağa-Çarpık (Pozitif Çarpık)</strong> denir.<br>- Eğer Ortalama, Medyandan <strong>KÜÇÜKSE</strong>: Kuyruk sola uzar. Düşük aykırı değerler ortalamayı aşağı çekmiştir. Buna <strong>Sola-Çarpık (Negatif Çarpık)</strong> denir.",
+                question: "Bir sınav sonucunda sınıfın Medyan (Ortanca) notu 80, Aritmetik Ortalaması ise 65 olarak hesaplanmıştır. Bu sınıfın not dağılımının şekli nasıldır?",
+                options: [
+                    { text: "Sola-Çarpık (Negatif Çarpık)", isCorrect: true, rationale: "Ortalama (65) < Medyan (80) durumundadır. Yani sınıftaki çok düşük not alan birkaç kişi ortalamayı şiddetle aşağı (sola) çekmiştir." },
+                    { text: "Sağa-Çarpık (Pozitif Çarpık)", isCorrect: false, rationale: "Sağa çarpık olması için Ortalamanın Medyandan daha büyük olması gerekirdi." },
+                    { text: "Simetrik Dağılım", isCorrect: false, rationale: "Simetrik olması için ikisinin birbirine çok yakın veya eşit olması gerekirdi." }
+                ]
+            },
+            {
+                id: "ceyrekler_iqr",
+                section: "Bölüm 2",
+                title: "Çeyreklikler, IQR ve Kutu Çizimi",
+                isImportantForMidterm: true,
+                concept: "Medyan veriyi tam ortadan ikiye (%50 - %50) böler. Çeyreklikler (Q1, Q2, Q3) ise veriyi sıralayıp dört eşit parçaya (%25) böler. Q2 zaten Medyanın ta kendisidir.<br><br><strong>Çeyreklerarası Aralık (IQR):</strong> Q3 (üst %25) ile Q1 (alt %25) arasındaki farktır. Verinin tam ortasındaki, uç değerlerden arındırılmış <strong>%50'lik merkez kısmının yayılımını</strong> gösterir.<br><strong>Box-and-Whisker (Kutu) Çizimi:</strong> Bu değerleri (Minimum, Q1, Medyan, Q3, Maksimum) görselleştiren, verinin nerede yoğunlaşıp nerede kuyruk yaptığını gösteren grafiktir.",
+                question: "Sıralanmış bir veri setinde İlk Çeyreklik (Q1) = 20, Üçüncü Çeyreklik (Q3) = 65 olarak verilmiştir. Çeyreklerarası Aralık (IQR) değeri nedir ve bu değer istatistiksel olarak ne anlama gelmektedir?",
+                options: [
+                    { text: "IQR = 45'tir. Verinin uç noktalardan (aykırı değerlerden) temizlenmiş, tam ortasındaki %50'sinin ne kadar geniş bir aralığa yayıldığını gösterir.", isCorrect: true, rationale: "IQR = Q3 - Q1 (65 - 20 = 45). IQR, aşırı yüksek ve düşük değerleri çöpe atıp verinin kalbindeki %50'nin yayılımını ölçer." },
+                    { text: "IQR = 45'tir. Veri setindeki en yüksek değer ile en düşük değer arasındaki toplam mesafeyi gösterir.", isCorrect: false, rationale: "En yüksek ve en düşük arasındaki mesafeye IQR değil, normal 'Aralık (Range)' denir." },
+                    { text: "IQR = 85'tir. Verinin ortalamasının karesini ifade eder.", isCorrect: false, rationale: "IQR toplanarak değil (65+20) çıkarılarak (65-20) bulunur." }
+                ]
+            },
+            {
+                id: "varyans_std",
+                section: "Bölüm 2",
+                title: "Varyans ve Standart Sapma",
+                isImportantForMidterm: true,
+                concept: "Veriler sadece merkezden ibaret değildir, aynı zamanda merkezin etrafına saçılmışlardır. Bu saçılmaya (riske, değişkenliğe) yayılım denir.<br><br><strong>Varyans:</strong> Tüm değerlerin ortalamadan farklarının karelerinin toplamıdır. Ancak karesi alındığı için birimi bozulur (Örn: TL'nin karesi).<br><strong>Standart Sapma:</strong> Varyansın kareköküdür. Verilerin ortalamadan ne kadar saptığını orijinal birimle gösterir.<br><br><strong>Kritik Kural:</strong> Eğer tüm anakütle ile değil de bir <em>Örneklem</em> ile çalışıyorsanız, varyans hesaplanırken paydadaki sayı n (gözlem sayısı) değil, her zaman <strong>n-1</strong> olur. Bunun nedeni formülü düzeltip <em>sapmasız (yanıltmayan)</em> bir tahmin yapmaktır.",
+                question: "Hesaplama yaparken, 'Örneklem Varyansı' formülünde değerleri ortalamadan çıkarıp karelerini topladıktan sonra neden gözlem sayısına (n) değil de (n - 1)'e böleriz?",
+                options: [
+                    { text: "Anakütle varyansını gerçeğe en yakın, 'sapmasız (unbiased)' şekilde tahmin edebilmek için.", isCorrect: true, rationale: "İstatistikte n-1'e bölme kuralı (Bessel düzeltmesi), küçük örneklemlerin varyansı düşük çıkarma eğilimini (sapmayı) düzeltmek içindir." },
+                    { text: "Kesirli sayılardan kaçınmak ve hesaplamayı kolaylaştırmak için.", isCorrect: false, rationale: "Bunun işlem kolaylığıyla bir ilgisi yoktur, tamamen teorik bir düzeltmedir." },
+                    { text: "Aykırı (uç) değerleri formülden tamamen dışlamak için.", isCorrect: false, rationale: "n-1'e bölmek, uç değerleri silmez, varyans uç değerlerden yine şiddetle etkilenir." }
+                ]
+            },
+            {
+                id: "degisim_katsayisi",
+                section: "Bölüm 2",
+                title: "Değişim Katsayısı (CV)",
+                isImportantForMidterm: true,
+                concept: "Diyelim ki elinizde iki farklı hisse senedi var. Birinin fiyatı 10 TL, diğerininki 1000 TL. Veya iki farklı ölçü var: Boy (cm) ve Kilo (kg).<br><br>Ortalamaları veya birimleri birbirinden bu kadar farklı iki değişkenin 'hangisi daha riskli / değişken?' sorusuna sadece standart sapmaya bakarak cevap veremezsiniz. <br>Bunun yerine <strong>Değişim Katsayısı (CV)</strong> kullanılır.<br>Formül: CV = (Standart Sapma / Ortalama) x 100<br>CV'si <em>düşük</em> olan, kendi ortalamasına göre daha istikrarlıdır.",
+                question: "A hissesinin ortalama fiyatı 50 TL, standart sapması 5 TL'dir. B hissesinin ortalama fiyatı 100 TL, standart sapması yine 5 TL'dir. İkisinin de standart sapması aynı olmasına rağmen, göreli olarak hangisi daha az değişkendir (daha az risklidir)?",
+                options: [
+                    { text: "B Hissesi daha az değişkendir (CV = %5).", isCorrect: true, rationale: "A için: 5 / 50 = %10 değişkenlik. B için: 5 / 100 = %5 değişkenlik. B hissesi kendi fiyatına oranla daha dar bir bantta hareket etmektedir." },
+                    { text: "A Hissesi daha az değişkendir (CV = %10).", isCorrect: false, rationale: "%10 değişkenlik, %5'ten daha büyüktür. Dolayısıyla A daha risklidir." },
+                    { text: "Standart sapmaları eşit olduğu için riskleri tamamen aynıdır.", isCorrect: false, rationale: "Sadece standart sapmaya bakarak karar vermek, elmalarla armutları kıyaslamak gibidir." }
+                ]
+            },
+            {
+                id: "ampirik_kural",
+                section: "Bölüm 2",
+                title: "Z-Skoru ve Ampirik Kural",
+                isImportantForMidterm: true,
+                concept: "<strong>Z-Skoru:</strong> Puanınızın, ortalamadan kaç 'standart sapma' yukarıda veya aşağıda olduğunu gösterir. Örneğin Z=+2 ise ortalamanın oldukça üzerindesiniz demektir.<br><br><strong>Ampirik Kural (68-95-99.7):</strong> Eğer bir veri dağılımı çan eğrisi (normal) şeklindeyse, verilerin;<br>- %68'i ortalamanın ± 1 standart sapma aralığında,<br>- <strong>%95'i ortalamanın ± 2 standart sapma aralığında,</strong><br>- %99.7'si ortalamanın ± 3 standart sapma aralığında yer alır.",
+                question: "Çan eğrisi (normal dağılım) gösteren bir üniversite sınavında not ortalaması 60, standart sapma ise 10 olarak hesaplanmıştır. Sınıftaki öğrencilerin yaklaşık %95'inin notları hangi iki değer arasındadır?",
+                options: [
+                    { text: "40 ile 80 arasında (Ortalama ± 2 Standart Sapma)", isCorrect: true, rationale: "Ampirik kurala göre %95'lik dilim 2 standart sapma demektir. 2 x 10 = 20. Ortalamadan (60) 20 çıkardık (40) ve 20 ekledik (80)." },
+                    { text: "50 ile 70 arasında (Ortalama ± 1 Standart Sapma)", isCorrect: false, rationale: "1 standart sapma aralığı (50-70) sınıfın %95'ini değil, yaklaşık %68'ini kapsar." },
+                    { text: "30 ile 90 arasında (Ortalama ± 3 Standart Sapma)", isCorrect: false, rationale: "3 standart sapma aralığı (30-90) sınıfın %99.7'sini kapsar." }
+                ]
+            },
+            {
+                id: "chebyshev",
+                section: "Bölüm 2",
+                title: "Chebyshev Teoremi",
+                isImportantForMidterm: false,
+                concept: "Ampirik Kuralın sadece 'çan eğrisi' şeklindeki verilerde çalıştığını öğrendik. Peki ya elimizdeki verinin şekli çok çarpıksa veya şeklini hiç bilmiyorsak?<br><br>İşte <strong>Chebyshev Teoremi</strong> verinin dağılım şekli <em>NE OLURSA OLSUN</em> her zaman çalışan formüldür. Kural şudur: Verilerin ortalamadan 'k' standart sapma uzaklıktaki oranı her zaman <strong>en az 1 - (1/k²)</strong>'dir. <br>Örneğin; k=2 yazarsak: 1 - (1/4) = 0.75. Yani verilerin <strong>en az %75'i</strong> ortalamanın 2 standart sapma çevresindedir.",
+                question: "Dağılım şekli bilinmeyen (çarpık veya düzensiz olabilen) bir veri setinde, verilerin EN AZ %75'inin ortalamanın kaç standart sapma çevresinde yer alacağı Chebyshev teoremi ile garanti altındadır?",
+                options: [
+                    { text: "2 standart sapma çevresinde", isCorrect: true, rationale: "Chebyshev formülünde (1 - 1/k^2) sonucu %75 (0.75) veren 'k' değeri 2'dir." },
+                    { text: "3 standart sapma çevresinde", isCorrect: false, rationale: "3 standart sapma için Chebyshev formülü 1 - (1/9) = %88.9 garantisi verir." },
+                    { text: "Chebyshev teoremi sadece normal dağılımlarda işe yarar, bu yüzden bilinemez.", isCorrect: false, rationale: "Tam tersi; Chebyshev teoreminin varoluş amacı şekli bilinmeyen/normal olmayan dağılımlardır." }
+                ]
+            },
+            {
+                id: "gruplandirilmis",
+                section: "Bölüm 2",
+                title: "Gruplandırılmış Verilerde Ortalama",
+                isImportantForMidterm: false,
+                concept: "Bazen veriler elimize tek tek sayısal olarak değil, sınıflar halinde özetlenmiş gelir. Örneğin: '10 ile 20 puan arası alan 5 öğrenci, 20 ile 30 puan arası alan 12 öğrenci var' gibi.<br><br>Bu durumda ortalamayı bulabilmek için o aralığı temsil edecek tek bir sayıya ihtiyacımız vardır. Bunun için her sınıfın <strong>tam orta noktasını (midpoint)</strong> alırız (Örn: 10-20 aralığı için 15). Sonra bu orta noktayı kişi sayısıyla çarparak ağırlıklı ortalama formülünü uygularız.",
+                question: "Ham verilerin gizlendiği ve sadece sınıf aralıklarının verildiği bir frekans tablosunda, formülleri çalıştırabilmek için 'sınıf' verisini temsilen hangi sayısal değer kullanılır?",
+                options: [
+                    { text: "O sınıf aralığının tam orta noktası", isCorrect: true, rationale: "Sınıfı dengeli temsil etmesi için üst ve alt sınır toplanıp ikiye bölünür (orta nokta)." },
+                    { text: "O sınıfın en büyük (maksimum) değeri", isCorrect: false, rationale: "Sürekli en üst değeri kullanırsanız, hesapladığınız ortalama gerçeğinden çok daha yüksek çıkar." },
+                    { text: "O sınıftaki toplam frekans sayısı", isCorrect: false, rationale: "Frekans sayısı sadece ağırlıktır, sınıfın kendi değerini (x) temsil etmez." }
+                ]
+            },
+            {
+                id: "korelasyon",
+                section: "Bölüm 2",
+                title: "Kovaryans ve Korelasyon Katsayısı",
+                isImportantForMidterm: true,
+                concept: "<strong>Kovaryans:</strong> İki değişkenin birlikte aynı yöne mi yoksa zıt yöne mi gittiğini söyler (artı veya eksi), ama bu ilişkinin gücü hakkında konuşamaz çünkü formülü birimlere bağlıdır.<br><br><strong>Korelasyon Katsayısı (r):</strong> Birimlerden arındırılmış kusursuz ölçüttür. Her zaman <strong>-1 ile +1 arasında</strong> bir değer alır. İşaret yönü, rakam gücü gösterir. +1'e veya -1'e yaklaştıkça ilişki çok güçlenir. 0'a yakınsa ilişki yoktur.<br><br><strong>ALTIN KURAL:</strong> İki şey arasında ne kadar güçlü korelasyon olursa olsun, istatistiksel olarak 'Biri diğerinin KESİN SEBEBİDİR' diyemezsiniz. Korelasyon nedensellik değildir.",
+                question: "Bir pazar araştırmasında, şemsiye satışları ile trafik kazaları arasındaki korelasyon katsayısı r = +0.85 olarak bulunmuştur. Bu yüksek değere bakılarak çıkarılabilecek en bilimsel yorum hangisidir?",
+                options: [
+                    { text: "İki değişken arasında güçlü pozitif bir ilişki vardır; beraber artıp azalma eğilimindedirler. ANCAK 'şemsiye satılması trafik kazasına sebep olur' diyemeyiz.", isCorrect: true, rationale: "+0.85 güçlü bir ilişkidir ancak korelasyon sebep-sonuç ilişkisini ispatlamaz (Muhtemelen ikisini de tetikleyen 3. bir etken, yani yağmur vardır)." },
+                    { text: "Korelasyon katsayısı 1'e çok yakın olduğu için, şemsiye kullanımının artmasının doğrudan trafik kazalarına neden olduğu KESİN OLARAK kanıtlanmıştır.", isCorrect: false, rationale: "İstatistikte altın kural: Korelasyon nedensellik (sebep-sonuç) demek değildir." },
+                    { text: "Katsayı 0'a uzak olduğu için bu iki değişken arasında hiçbir matematiksel ilişki yoktur.", isCorrect: false, rationale: "Sıfıra uzak olması zayıf değil, aksine ilişkinin çok GÜÇLÜ olduğunu gösterir." }
+                ]
+            }
+        ];
+
+        // --- UYGULAMA MANTIĞI ---
+        let currentQueue = [];
+        let currentIndex = 0;
+        let score = 0;
+        let isAnswered = false;
+        let weakTopics = new Set();
+        let currentMode = "MENU"; // MENU, MAIN, REMEDIAL
+
+        // Ekran geçiş fonksiyonu
+        function switchScreen(screenId) {
+            const screens = ['menu-screen', 'concept-screen', 'quiz-screen', 'result-screen'];
+            screens.forEach(id => {
+                document.getElementById(id).classList.add('hidden-view');
+            });
+            document.getElementById(screenId).classList.remove('hidden-view');
+        }
+
+        // Ana Menüyü Yükle
+        function initMenu() {
+            const grid = document.getElementById('topic-grid');
+            grid.innerHTML = '';
+            
+            allTopics.forEach(topic => {
+                const btn = document.createElement('button');
+                btn.className = "btn-outline flex flex-col items-start p-4 rounded text-left h-full w-full justify-between group";
+                btn.onclick = () => startSingleTopic(topic.id);
+                
+                const starHtml = topic.isImportantForMidterm 
+                    ? `<span class="badge-vize text-[10px] px-1.5 py-0.5 rounded ml-2 uppercase font-bold">Vize</span>` 
+                    : "";
+
+                btn.innerHTML = `
+                    <div class="w-full">
+                        <div class="text-[11px] font-bold text-slate-400 mb-1 uppercase tracking-wider">${topic.section}</div>
+                        <h4 class="text-slate-800 font-semibold mb-2 group-hover:text-blue-600 transition-colors flex items-center flex-wrap">${topic.title} ${starHtml}</h4>
+                    </div>
+                    <div class="text-xs text-blue-600 font-medium mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        Çalış ve Çöz →
+                    </div>
+                `;
+                grid.appendChild(btn);
+            });
+            switchScreen('menu-screen');
+        }
+
+        function returnToMenu() {
+            if (currentMode !== "MENU") {
+                if(!confirm("İlerleyişiniz kaydedilmeyecek. Menüye dönmek istediğinize emin misiniz?")) return;
+            }
+            currentMode = "MENU";
+            initMenu();
+        }
+
+        function startAllTopics() {
+            currentQueue = [...allTopics];
+            startSession("MAIN");
+        }
+
+        function startSingleTopic(topicId) {
+            currentQueue = [allTopics.find(t => t.id === topicId)];
+            startSession("MAIN");
+        }
+
+        function startSession(mode) {
+            currentMode = mode;
+            currentIndex = 0;
+            if (mode === "MAIN") {
+                score = 0;
+                weakTopics.clear();
+            }
+            loadConcept();
+        }
+
+        function loadConcept() {
+            if (currentIndex >= currentQueue.length) {
+                if (currentMode === "MAIN") {
+                    showResults();
+                } else {
+                    alert("Tebrikler! Eksiklerinizi başarıyla tamamladınız.");
+                    currentMode = "MENU";
+                    initMenu();
+                }
+                return;
+            }
+
+            const data = currentQueue[currentIndex];
+            
+            document.getElementById("concept-title").innerHTML = currentMode === "MAIN" ? data.title : "Tekrar İncele: " + data.title;
+            document.getElementById("concept-content").innerHTML = data.concept;
+            document.getElementById("concept-progress").innerText = `${currentIndex + 1} / ${currentQueue.length}`;
+            
+            const starBadge = document.getElementById("concept-star");
+            if (data.isImportantForMidterm && currentMode === "MAIN") {
+                starBadge.classList.remove('hidden-view');
+            } else {
+                starBadge.classList.add('hidden-view');
+            }
+
+            switchScreen('concept-screen');
+            if (window.MathJax) MathJax.typesetPromise();
+        }
+
+        function goToQuestion() {
+            isAnswered = false;
+            document.getElementById('next-btn').classList.add('hidden-view');
+            document.getElementById('feedback-box').classList.add('hidden-view');
+            
+            const data = currentQueue[currentIndex];
+            document.getElementById("question-text").innerHTML = data.question;
+            document.getElementById("score").innerText = score;
+
+            const optsContainer = document.getElementById("options-container");
+            optsContainer.innerHTML = '';
+
+            data.options.forEach((opt, idx) => {
+                const btn = document.createElement("button");
+                btn.className = "option-btn w-full text-left p-4 rounded bg-white border border-slate-300 text-slate-700 font-medium transition hover:bg-slate-50";
+                btn.innerHTML = `${opt.text}`;
+                btn.onclick = () => handleAnswer(btn, opt, data.id);
+                optsContainer.appendChild(btn);
+            });
+
+            switchScreen('quiz-screen');
+            if (window.MathJax) MathJax.typesetPromise();
+        }
+
+        function handleAnswer(btn, optionInfo, topicId) {
+            // Eğer daha önce cevaplanmışsa tıklamaları engelle
+            if (isAnswered) return;
+            isAnswered = true;
+
+            // Tüm şıkları kilitle
+            const allBtns = document.querySelectorAll(".option-btn");
+            allBtns.forEach(b => {
+                b.disabled = true;
+                b.classList.add('opacity-70', 'cursor-not-allowed');
+                b.classList.remove('hover:bg-slate-50');
+            });
+
+            const feedbackBox = document.getElementById("feedback-box");
+            feedbackBox.classList.remove("hidden-view");
+
+            if (optionInfo.isCorrect) {
+                // DOĞRU CEVAP
+                btn.classList.remove('bg-white', 'border-slate-300', 'text-slate-700', 'opacity-70');
+                btn.classList.add('bg-green-100', 'border-green-500', 'text-green-800');
+                
+                if (currentMode === "MAIN") score += 10;
+                document.getElementById("score").innerText = score;
+
+                feedbackBox.className = "p-4 rounded text-sm mb-6 border bg-green-50 text-green-800 border-green-200";
+                feedbackBox.innerHTML = `<strong>Doğru!</strong> <br><span class="text-green-700">${optionInfo.rationale}</span>`;
+            } else {
+                // YANLIŞ CEVAP
+                btn.classList.remove('bg-white', 'border-slate-300', 'text-slate-700', 'opacity-70');
+                btn.classList.add('bg-red-100', 'border-red-500', 'text-red-800');
+                
+                if (currentMode === "MAIN") weakTopics.add(topicId);
+
+                // Doğru olan şıkkı görsel olarak belirginleştir
+                const correctIndex = currentQueue[currentIndex].options.findIndex(o => o.isCorrect);
+                if (correctIndex > -1) {
+                    allBtns[correctIndex].classList.remove('bg-white', 'border-slate-300', 'text-slate-700', 'opacity-70');
+                    allBtns[correctIndex].classList.add('bg-green-50', 'border-green-400', 'text-green-700');
+                }
+
+                feedbackBox.className = "p-4 rounded text-sm mb-6 border bg-red-50 text-red-800 border-red-200";
+                feedbackBox.innerHTML = `<strong>Yanlış Cevap.</strong> <br><span class="text-red-700">${optionInfo.rationale || 'Bu konu eksik giderme modunda tekrar karşına çıkacak.'}</span>`;
+            }
+
+            // CRITICAL FIX: Sonraki soruya geçme butonunu HER ZAMAN göster
+            document.getElementById("next-btn").classList.remove("hidden-view");
+            if (window.MathJax) MathJax.typesetPromise();
+        }
+
+        function handleNext() {
+            currentIndex++;
+            loadConcept();
+        }
+
+        function showResults() {
+            document.getElementById("final-score").innerText = score;
+            
+            const weaknessContainer = document.getElementById("weakness-container");
+            const perfectContainer = document.getElementById("perfect-score-container");
+            const list = document.getElementById("weakness-list");
+            
+            list.innerHTML = "";
+
+            if (weakTopics.size > 0) {
+                weaknessContainer.classList.remove("hidden-view");
+                perfectContainer.classList.add("hidden-view");
+                
+                weakTopics.forEach(topicId => {
+                    const topic = allTopics.find(t => t.id === topicId);
+                    if (topic) {
+                        const li = document.createElement("li");
+                        li.innerText = topic.title;
+                        list.appendChild(li);
+                    }
+                });
+            } else {
+                weaknessContainer.classList.add("hidden-view");
+                perfectContainer.classList.remove("hidden-view");
+            }
+            
+            switchScreen('result-screen');
+        }
+
+        function startRemedial() {
+            // Yanlış yapılan konuları kuyruğa al
+            const remedialArray = [];
+            weakTopics.forEach(topicId => {
+                const originalTopic = allTopics.find(t => t.id === topicId);
+                if (originalTopic) {
+                    remedialArray.push(originalTopic); // Eksik gidermede aynı eğitim kartını tekrar gösteriyoruz ki iyice otursun
+                }
+            });
+            
+            currentQueue = remedialArray;
+            startSession("REMEDIAL");
+        }
+
+        // Başlangıç tetiklemesi
+        window.onload = initMenu;
+    </script>
+</body>
+</html>
